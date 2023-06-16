@@ -39,7 +39,7 @@ The features I would know at the "time of prediction" are the number of steps an
 The precision on unseen data is 0.7501. I believe this score is not bad, but there's space for improving. It is plausible to add more features in the model. Also, random forest is affected largely by its hyperparameters, so I can do more works on optimizing some of them to improve the model.
 
 Below is the confusion matrix for the baseline model on unseen data. 
-<iframe src="assets/baseline.png" width=600 height=450 frameBorder=0></iframe>
+<iframe src="assets/baseline.png" width=800 height=600 frameBorder=0></iframe>
 
 ---
 
@@ -61,7 +61,37 @@ In the final model, I add the following features from dataset and encodings on e
 - The extreme long cooking time indicator from `minute` is kept from the baseline model. Also, `minute` is standardized.
 - For `n_steps` and `n_ingredients`, one thing I did is create 5 ordinal quantile features for each of them. Another thing is I create binary indicators for them to express if the recipe contains only a small number (less than 5) of steps/ingredients, because by exploratory analysis, most recipes with small number of steps or ingredients are easy. 
 
+##### Performance
+
+The precision on unseen data is 0.9348, which is a very high evaluation. Comparing to the precision of about 0.75, the precision of my model is improved obviously. Also, the false positive (which I concern most) decreases from ~8000 to ~2000 on the same set of unseen data. 
+
+Below is the confusion matrix for the final model on unseen data:
+<iframe src="assets/final.png" width=800 height=600 frameBorder=0></iframe>
+
 
 ## Fairness Analysis
 
+In this part, the question I will try to answer is: 
+
+Does my model perform better for recipes with high average rating (over 4 points) than it does for recipes with low average rating (equal or less than 4 points)?
+
+I choose the average rating to group the predictions because the false positive rate (1-precision) looks suspicious for different level of average rating. You can observe this in the graph:
+
+<iframe src="assets/FP_avgrating.html" width=800 height=600 frameBorder=0></iframe>
+
+To answer this question, I will perform a **permutation test** to check if predictions in high-rating group and those in low-rating group are likely to be from the same distribution.
+
+I will generate the binary indicator of high/low average rating from `avg_rating`. This column contains some missingness, which indicate that the recipe does not have any rating. I use 0 to fill these missingness when perform prediction.
+
+The test statistic will be difference between precisions (high - low), and the significance level is 0.01.  
+
+##### Hypothesis
+
+Null Hypothesis: Our model is fair. Its precision for high-rating recipes and other recipes are overall same.
+
+Alternative Hypothesis: Our model is unfair. Its precision for high-rating recipes is *higher* than its precision for low-rating recipes.
+
+##### Result & Conclusion
+
+The p-value is 0, which means the null hypothesis is rejected at the significance level of 0.01 (actually, at any usually-used significance level, 0.01, 0.05, or 0.1). **There is enough evidence that the model is unfair across high-rating and low-rating recipes.** This could happens because of recipes with no ratings are counted as have an average rating of 0, and these recipes draw down the precision of prediction.
 
