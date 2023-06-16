@@ -17,10 +17,25 @@ The metric I'm using to evaluate the model is **precision**. I choose this metri
 
 The features I would know at the "time of prediction" are the number of steps and ingredients, nutritions, minutes needed to make, and the average rating of the recipes, and they are the features I will use in the following model(s).
 
+---
 
 ## Baseline Model
 
+Model: **Random Forest**
+- As the improvement of decision tree model, random forest classification model applies bootstrapped samples, and it solves the issue of correlation between trees due to different strength across predictors. According to the exploratory analysis, there are possible stronger predictors (e.g. `minutes`) than others, so I choose random forest model to perform the prediction. 
+- For hyperparameters, I use default setting for most of them, except tuning `n_estimators` to be 50. This is due to the consideration on runtime, and this number is not too small to provide an appropriate result.
 
+Features: `minutes`, `n_steps`, `n_ingredients`
+- The three variables are all quantitative.
+- `minutes` refers to the minutes needed to cook a recipe; `n_steps` and `n_ingredients` refer to the number of steps and ingredients in a recipe respectively. More description about variables can be found in exploratory analysis. 
+- To deal with some recipes which take extreme long time to cook, I encode `minutes` variable into a binary indicator, describing if the recipe takes over 3 hours to cook. 
+
+Performance: The precision on unseen data is 0.7501. I believe this score is not bad, but there's space for improving. It is plausible to add more features in the model. Also, random forest is affected largely by its hyperparameters, so I can do more works on optimizing some of them to improve the model.
+
+Below is the confusion matrix for the baseline model on unseen data. 
+<iframe src="assets/baseline.png" width=450 height=450 frameBorder=0></iframe>
+
+---
 
 ## Final Model
 
